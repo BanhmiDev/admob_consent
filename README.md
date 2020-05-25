@@ -32,7 +32,7 @@ _admobConsent.onConsentFormClosed.listen((bool status) {
 ```
 
 ## Enjoy it?
-<a href="https://www.buymeacoffee.com/AntegerDigital" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;" ></a>
+<a href="https://www.buymeacoffee.com/AntegerDigital" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;"></a>
 
 ## Troubleshooting
 ### Consent form does not show up in Android release builds
