@@ -2,7 +2,7 @@
 
 ![Pub Version](https://img.shields.io/pub/v/admob_consent)
 
-An extended wrapper for Google's Mobile Ads SDK in Flutter. Works on Android and iOS. The Android version has been modified to include localized consent forms.
+An extended wrapper for Google's Mobile Ads Consent SDK, i.e. used as GDPR dialog on Android and iOS. The Android version has been modified to include localized consent forms. Customizable to include own Publisher ID and privacy policy URL.
 
 ## Usage
 To use this plugin, add `admob_consent` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
@@ -32,7 +32,7 @@ _admobConsent.onConsentFormClosed.listen((bool status) {
 ```
 
 ## Enjoy it?
-<a href="https://www.buymeacoffee.com/AntegerDigital" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
+<a href="https://www.buymeacoffee.com/AntegerDigital" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;" ></a>
 
 ## Troubleshooting
 ### Consent form does not show up in Android release builds
@@ -70,4 +70,4 @@ You most likely have to fiddle with proguards to keep some classes from being ob
 ```
 
 ## Screenshot
-![Example Screenshot](example.jpg)
+![Example Screenshot](https://www.anteger.com/images/uploads/admob_consent_example.jpg)

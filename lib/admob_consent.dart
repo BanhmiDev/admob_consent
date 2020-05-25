@@ -60,7 +60,10 @@ class AdmobConsent {
   }
 
   /// Shows admob consent form for the given publisherId
-  Future<Null> show({@required String publisherId, @required String privacyURL}) async => await _channel.invokeMethod('show', {'publisherId' : publisherId, 'privacyURL': privacyURL});
+  Future<Null> show(
+          {@required String publisherId, @required String privacyURL}) async =>
+      await _channel.invokeMethod(
+          'show', {'publisherId': publisherId, 'privacyURL': privacyURL});
 
   /// Returns true when the form has been loaded
   Stream<Null> get onConsentFormLoaded => _onConsentFormLoaded.stream;
@@ -73,7 +76,7 @@ class AdmobConsent {
 
   /// Returns an error message when an error has occurred
   Stream<dynamic> get onConsentFormError => _onConsentFormError.stream;
-  
+
   void dispose() {
     _onConsentFormLoaded.close();
     _onConsentFormOpened.close();

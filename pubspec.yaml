@@ -1,6 +1,6 @@
 name: admob_consent
-description: An extended wrapper for Google's Mobile Ads Consent SDK
-version: 0.0.1
+description: An extended wrapper for Google's Mobile Ads Consent SDK, i.e. used as GDPR dialog on Android and iOS.
+version: 1.0.0
 homepage: https://www.anteger.com
 
 environment:
