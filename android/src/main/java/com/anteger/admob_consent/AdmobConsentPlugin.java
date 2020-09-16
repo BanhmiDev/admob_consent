@@ -148,23 +148,24 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
       new UserMessagingPlatform.OnConsentFormLoadSuccessListener() {
         @Override
         public void onConsentFormLoadSuccess(ConsentForm consentForm) {
-          methodChannel.invokeMethod("onConsentFormOpened", null);
+          // Form load success
           consentForm = consentForm;
+          methodChannel.invokeMethod("onConsentFormOpened", null);
+
           if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.REQUIRED) {
-            // Not obtained yet, first time
+            // Consent required, first time opening form
             consentForm.show(
               activity,
               new ConsentForm.OnConsentFormDismissedListener() {
                   @Override
                   public void onConsentFormDismissed(FormError formError) {
-                    // Handle dismissal by reloading form.
-                    loadForm();
+                    // Obtained consent from form
+                    methodChannel.invokeMethod("onConsentFormObtained", null);
                   }
               }
             );
-          }
-          if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
-            // Already obtained, possibility to manage/change settings
+          } else if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
+            // Already obtained previously, display form to let user manage/change consent
             consentForm.show(
               activity,
               new ConsentForm.OnConsentFormDismissedListener() {

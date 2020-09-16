@@ -83,15 +83,17 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
         } else {
             // Form load success
             self.channel.invokeMethod("onConsentFormOpened", arguments: nil)
+
             if UMPConsentInformation.sharedInstance.consentStatus == .required {
-              // Not obtained yet, first time
+              // Consent required, first time opening form
               form?.present(from: currentViewController, completionHandler: {(dismissError) in
-                // Handle dismissal by reloading form.
-                self.loadForm(currentViewController: currentViewController)
+                if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
+                  // Obtained consent from form
+                  self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
+                }
               })
-            }
-            if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
-              // Already obtained, possibility to manage/change settings
+            } else if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
+              // Already obtained previously, display form to let user manage/change consent
               form?.present(from: currentViewController, completionHandler: {(dismissError) in
                   if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
                     self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
