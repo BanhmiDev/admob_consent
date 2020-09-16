@@ -15,7 +15,7 @@
  */
 import Flutter
 import UIKit
-import PersonalizedAdConsent
+import UserMessagingPlatform
 
 public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
   
@@ -45,12 +45,6 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
   }
 
   private func showConsent(_ call: FlutterMethodCall) {
-    guard let args = call.arguments as? Dictionary<String, Any> else {
-      let data: [String:Any] = ["message": "Invalid call arguments"] // Used for invoke methods (listeners)
-      self.channel.invokeMethod("onConsentFormError", arguments: data)
-      return
-    }
-
     let presentedViewController = self.viewController?.presentedViewController
     let currentViewController: UIViewController? = presentedViewController ?? self.viewController as? UIViewController
 
@@ -60,53 +54,51 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
       self.channel.invokeMethod("onConsentFormError", arguments: data)
       return
     }
-
-    PACConsentInformation.sharedInstance.requestConsentInfoUpdate(
-      forPublisherIdentifiers: [(args["publisherId"] as! String)])
-    {(_ error: Error?) -> Void in
-      if let error = error {
-        // Consent info update failed.            
-        let data: [String:Any] = ["message": "Consent info fetch failed"] // Used for invoke methods (listeners)
-        self.channel.invokeMethod("onConsentFormError", arguments: data)
-      } else {
-        // Consent info update succeeded. The shared PACConsentInformation
-        // instance has been updated.
-        guard let privacyUrl = URL(string: (args["privacyURL"] as! String)),
-            let form = PACConsentForm(applicationPrivacyPolicyURL: privacyUrl) else {
-            let data: [String:Any] = ["message": "Invalid privacy URL"] // Used for invoke methods (listeners)
+    
+    let parameters = UMPRequestParameters()
+    parameters.tagForUnderAgeOfConsent = false
+    UMPConsentInformation.sharedInstance.requestConsentInfoUpdate(with: parameters, completionHandler: {(error) in
+        if let error = error as NSError? {
+            // Consent info update error
+            let data: [String:Any] = ["message": "Consent info fetch failed"] // Used for invoke methods (listeners)
             self.channel.invokeMethod("onConsentFormError", arguments: data)
-            return
-        }
-        form.shouldOfferPersonalizedAds = true
-        form.shouldOfferNonPersonalizedAds = true
-        form.load {(_ error: Error?) -> Void in
-          if let error = error {
-            // Error
-            let data: [String:Any] = ["message": "\(error)"] // Used for invoke methods (listeners)
-            self.channel.invokeMethod("onConsentFormError", arguments: data)
-          } else {
+        } else {
+            // Consent info update success
             self.channel.invokeMethod("onConsentFormLoaded", arguments: nil)
-            self.channel.invokeMethod("onConsentFormOpened", arguments: nil)
-            // Success load, present
-            form.present(from: currentViewController!) { (error, userPrefersAdFree) in
-              if let error = error {
-                // Error
-                let data: [String:Any] = ["message": "\(error)"] // Used for invoke methods (listeners)
-                self.channel.invokeMethod("onConsentFormError", arguments: data)
-              } else if userPrefersAdFree {
-                // User prefers to use a paid version of the app.
-                // TODO
-              } else {
-                // Check the user's consent choice.
-                var data: [String:Any] = [:] // Used for invoke methods (listeners)
-                let status = PACConsentInformation.sharedInstance.consentStatus
-                data["shouldPersonalize"] = !(status == PACConsentStatus.nonPersonalized || status == PACConsentStatus.unknown)
-                self.channel.invokeMethod("onConsentFormClosed", arguments: data)
-              }
+            let formStatus = UMPConsentInformation.sharedInstance.formStatus
+            if formStatus == .available {
+              // Load form
+              self.loadForm(currentViewController: currentViewController!)
             }
-          }
         }
-      }
-    }
+    })
+  }
+
+  private func loadForm(currentViewController: UIViewController) {
+    UMPConsentForm.load(completionHandler: {(form, loadError) in
+        if let error = loadError as NSError? {
+            // Form load error
+            let data: [String:Any] = ["message": "Consent form failed"] // Used for invoke methods (listeners)
+            self.channel.invokeMethod("onConsentFormError", arguments: data)
+        } else {
+            // Form load success
+            self.channel.invokeMethod("onConsentFormOpened", arguments: nil)
+            if UMPConsentInformation.sharedInstance.consentStatus == .required {
+              // Not obtained yet, first time
+              form?.present(from: currentViewController, completionHandler: {(dismissError) in
+                // Handle dismissal by reloading form.
+                self.loadForm(currentViewController: currentViewController)
+              })
+            }
+            if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
+              // Already obtained, possibility to manage/change settings
+              form?.present(from: currentViewController, completionHandler: {(dismissError) in
+                  if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
+                    self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
+                  }
+              })
+            }
+        }
+    })
   }
 }

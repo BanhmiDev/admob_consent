@@ -1,6 +1,6 @@
 name: admob_consent
-description: An extended wrapper for Google's Mobile Ads Consent SDK, i.e. used as GDPR dialog on Android and iOS.
-version: 1.0.0+1
+description: A wrapper for Google's User Messaging Platform, used for consent gathering (i.e. GDPR) on Android and iOS.
+version: 1.1.0
 homepage: https://www.anteger.com
 repository: https://github.com/gimu/admob_consent
 issue_tracker: https://github.com/gimu/admob_consent/issues

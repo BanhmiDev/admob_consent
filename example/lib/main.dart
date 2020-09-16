@@ -14,20 +14,19 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
 
   AdmobConsent _admobConsent = AdmobConsent();
-  StreamSubscription<bool> _subscription;
+  StreamSubscription<void> _subscription;
 
   @override
   void initState() {
     super.initState();
-    _subscription = _admobConsent.onConsentFormClosed.listen((bool status) {
-      // Status true if personalized
-      // Handle it, ie. set targetingInfo
+    _subscription = _admobConsent.onConsentFormObtained.listen((o) {
+      // Obtained consent
     });
     initPlatformState();
   }
 
   Future<void> initPlatformState() async {
-    _admobConsent.show(publisherId: "REPLACE_WITH_YOUR_PUBLISHER_ID", privacyURL: "REPLACE_WITH_YOUR_PRIVACY_URL");
+    _admobConsent.show();
   }
 
   @override

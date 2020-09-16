@@ -2,32 +2,66 @@
 
 ![Pub Version](https://img.shields.io/pub/v/admob_consent)
 
-An extended wrapper for Google's Mobile Ads Consent SDK, i.e. used as GDPR dialog on Android and iOS. The Android version has been modified to include localized consent forms. Customizable to include own Publisher ID and privacy policy URL.
+User Messaging Platform wrapper used for consent gathering (i.e. GDPR) on Android and iOS. **NEW:** now uses Google's new `User Messaging Platform` with `Funding Choices`.
+
+## Screenshots
+
+| Example 1 | Example 2 |
+| :-------: | :-------: |
+| ![Example 1](https://www.anteger.com/images/uploads/admob_consent_example_2.png) | ![Example 2](https://www.anteger.com/images/uploads/admob_consent_example.png) |
 
 ## Usage
 To use this plugin, add `admob_consent` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
 
+## Requirements
+
+### 1. Funding Choices
+
+* Create a [Funding Choices account](https://support.google.com/fundingchoices/answer/9180084)
+* Create respective messages inside Funding Choices for your desired app and publish them
+
+### 2. Android Setup
+
+Make sure to have added your [app ID](https://support.google.com/admob/answer/7356431) to `AndroidManifest.xml`.
+
+```xml
+<meta-data
+    android:name="com.google.android.gms.ads.APPLICATION_ID"
+    android:value="YOUR-APP-ID"/>
+```
+
+### 3. iOS Setup
+
+Make sure to have added your [app ID](https://support.google.com/admob/answer/7356431) to `Info.plist`.
+
+```xml
+<key>GADApplicationIdentifier</key>
+<string>YOUR-APP-ID</string>
+```
+
+If you intend to use this SDK for Apple's new ATT requirement (iOS 14+), add the following to `Info.plist`. More information [here](https://support.google.com/fundingchoices/answer/9995402).
+
+```xml
+<key>NSUserTrackingUsageDescription</key>
+<string>This identifier will be used to deliver personalized ads to you.</string>
+```
+
 ### Example
 
-``` dart
+```dart
 import 'package:flutter/material.dart';
 import 'package:admob_consent/admob_consent.dart';
 
 final AdmobConsent _admobConsent = AdmobConsent();
-
-_admobConsent.show(publisherId: "REPLACE_WITH_YOUR_PUBLISHER_ID", privacyURL: "URL_TO_YOUR_PRIVACY_POLICY");
+_admobConsent.show();
 ```
 
-### Publisher ID
-Your publisher ID is the unique identifier for your AdMob account. [Find your publisher ID](https://support.google.com/admob/answer/2784578). It should look like this ```pub-XXXXXXXXXXXXXXXX```.
-
 ### Listener
-You can listen to the ```onConsentFormLoaded```, ```onConsentFormOpened```, ```onConsentFormClosed``` and ```onConsentFormError``` streams.
+You can listen to the ```onConsentFormLoaded```, ```onConsentFormOpened```, ```onConsentFormObtained``` and ```onConsentFormError``` streams.
 
 ``` dart
-_admobConsent.onConsentFormClosed.listen((bool status) {
-    // Status true if personalized
-    // Handle it, ie. set targetingInfo
+_admobConsent.onConsentFormObtained.listen((o) {
+  // Obtained consent
 });
 ```
 
@@ -68,6 +102,3 @@ You most likely have to fiddle with proguards to keep some classes from being ob
   @com.google.gson.annotations.SerializedName <fields>;
 }
 ```
-
-## Screenshot
-![Example Screenshot](https://www.anteger.com/images/uploads/admob_consent_example.jpg)

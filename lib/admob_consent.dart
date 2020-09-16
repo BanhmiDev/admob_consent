@@ -23,8 +23,8 @@ class AdmobConsent {
 
   final _onConsentFormLoaded = StreamController<Null>.broadcast();
   final _onConsentFormOpened = StreamController<Null>.broadcast();
-  final _onConsentFormClosed = StreamController<bool>.broadcast();
-  final _onConsentFormError = StreamController<bool>.broadcast();
+  final _onConsentFormObtained = StreamController<Null>.broadcast();
+  final _onConsentFormError = StreamController<dynamic>.broadcast();
 
   static AdmobConsent _instance;
 
@@ -50,8 +50,8 @@ class AdmobConsent {
       case 'onConsentFormOpened':
         _onConsentFormOpened.add(null);
         break;
-      case 'onConsentFormClosed':
-        _onConsentFormClosed.add(call.arguments['shouldPersonalize']);
+      case 'onConsentFormObtained':
+        _onConsentFormObtained.add(null);
         break;
       case 'onConsentFormError':
         _onConsentFormError.add(call.arguments['message']);
@@ -60,27 +60,24 @@ class AdmobConsent {
   }
 
   /// Shows admob consent form for the given publisherId
-  Future<Null> show(
-          {@required String publisherId, @required String privacyURL}) async =>
-      await _channel.invokeMethod(
-          'show', {'publisherId': publisherId, 'privacyURL': privacyURL});
+  Future<Null> show() async => await _channel.invokeMethod('show');
 
-  /// Returns true when the form has been loaded
+  /// Triggered when the form has been loaded
   Stream<Null> get onConsentFormLoaded => _onConsentFormLoaded.stream;
 
-  /// Returns true when the consent form has been opened
+  /// Triggered when the consent form has been opened
   Stream<Null> get onConsentFormOpened => _onConsentFormOpened.stream;
 
-  /// Returns true if personalized ads should be used
-  Stream<bool> get onConsentFormClosed => _onConsentFormClosed.stream;
+  /// Triggered when the consent form has been opened
+  Stream<Null> get onConsentFormObtained => _onConsentFormObtained.stream;
 
-  /// Returns an error message when an error has occurred
+  /// Returns error message when an error has occurred
   Stream<dynamic> get onConsentFormError => _onConsentFormError.stream;
 
   void dispose() {
     _onConsentFormLoaded.close();
     _onConsentFormOpened.close();
-    _onConsentFormClosed.close();
+    _onConsentFormObtained.close();
     _onConsentFormError.close();
     _instance = null;
   }

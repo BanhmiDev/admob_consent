@@ -19,12 +19,11 @@ import android.app.Activity;
 
 import androidx.annotation.NonNull;
 
-import com.anteger.admob_consent.ConsentForm;
-import com.anteger.admob_consent.ConsentFormListener;
-import com.anteger.admob_consent.ConsentInfoUpdateListener;
-import com.anteger.admob_consent.ConsentInformation;
-import com.anteger.admob_consent.ConsentStatus;
-import com.anteger.admob_consent.DebugGeography;
+import com.google.android.ump.ConsentForm;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.FormError;
+import com.google.android.ump.UserMessagingPlatform;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -48,6 +47,9 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
 
   private MethodChannel methodChannel;
   private Activity activity;
+
+  private ConsentInformation consentInformation;
+  private ConsentForm consentForm;
 
   /** Plugin registration. */
   public static void registerWith(PluginRegistry.Registrar registrar) {
@@ -110,74 +112,79 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
     }
   }
 
-  ConsentForm form;
-
   private void showConsent(MethodCall call) {
     if (activity == null) return; // No activity
-
-    final String publisherId = call.argument("publisherId");
-    final String privacyURL = call.argument("privacyURL");
-    URL tmpPrivacyURL = null;
-    try {
-      tmpPrivacyURL = new URL(privacyURL);
-    } catch (MalformedURLException e) {
-      // Error
-      Map<String, Object> args = new HashMap<>();
-      args.put("message", "Invalid privacy URL");
-      methodChannel.invokeMethod("onConsentFormError", args);
-      return;
-    }
-    final URL realPrivacyURL = tmpPrivacyURL;
-    ConsentInformation consentInformation = ConsentInformation.getInstance(activity);
-    String[] publisherIds = {publisherId};
-    consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
+    ConsentRequestParameters params = new ConsentRequestParameters.Builder().build();
+    consentInformation = UserMessagingPlatform.getConsentInformation(activity);
+    consentInformation.requestConsentInfoUpdate(
+      activity,
+      params,
+      new ConsentInformation.OnConsentInfoUpdateSuccessListener() {
         @Override
-        public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-          // User's consent status successfully updated.
-          // Create form
-          form = new ConsentForm.Builder(activity, realPrivacyURL).withListener(new ConsentFormListener() {
-            @Override
-            public void onConsentFormLoaded() {
-                // Consent form loaded successfully.
-                methodChannel.invokeMethod("onConsentFormLoaded", null);
-                form.show();
+        public void onConsentInfoUpdateSuccess() {
+            methodChannel.invokeMethod("onConsentFormLoaded", null);
+            // The consent information state was updated.
+            // You are now ready to check if a form is available.
+            if (consentInformation.isConsentFormAvailable()) {
+              // Load form
+              loadForm();
             }
-
-            @Override
-            public void onConsentFormOpened() {
-                // Consent form was displayed.
-                methodChannel.invokeMethod("onConsentFormOpened", null);
-            }
-
-            @Override
-            public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
-                // Consent form was closed.
-                // Return false if status NON_PERSONALIZED/UNKNOWN
-                Map<String, Object> args = new HashMap<>();
-                args.put("shouldPersonalize", (consentStatus == ConsentStatus.PERSONALIZED));
-                methodChannel.invokeMethod("onConsentFormClosed", args);
-            }
-
-            @Override
-            public void onConsentFormError(String errorDescription) {
-              Map<String, Object> args = new HashMap<>();
-              args.put("message", errorDescription);
-              methodChannel.invokeMethod("onConsentFormError", args);
-            }
-          })
-          .withPersonalizedAdsOption()
-          .withNonPersonalizedAdsOption()
-          .build();
-          form.load();
         }
-
+      },
+      new ConsentInformation.OnConsentInfoUpdateFailureListener() {
         @Override
-        public void onFailedToUpdateConsentInfo(String errorDescription) {
-          // User's consent status failed to update.
+        public void onConsentInfoUpdateFailure(FormError formError) {
           Map<String, Object> args = new HashMap<>();
-          args.put("message", errorDescription);
+          args.put("message", formError.getMessage());
           methodChannel.invokeMethod("onConsentFormError", args);
         }
-    });
+      }
+    );
+  }
+
+  private void loadForm() {
+    UserMessagingPlatform.loadConsentForm(
+      activity,
+      new UserMessagingPlatform.OnConsentFormLoadSuccessListener() {
+        @Override
+        public void onConsentFormLoadSuccess(ConsentForm consentForm) {
+          methodChannel.invokeMethod("onConsentFormOpened", null);
+          consentForm = consentForm;
+          if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.REQUIRED) {
+            // Not obtained yet, first time
+            consentForm.show(
+              activity,
+              new ConsentForm.OnConsentFormDismissedListener() {
+                  @Override
+                  public void onConsentFormDismissed(FormError formError) {
+                    // Handle dismissal by reloading form.
+                    loadForm();
+                  }
+              }
+            );
+          }
+          if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
+            // Already obtained, possibility to manage/change settings
+            consentForm.show(
+              activity,
+              new ConsentForm.OnConsentFormDismissedListener() {
+                  @Override
+                  public void onConsentFormDismissed(FormError formError) {
+                    methodChannel.invokeMethod("onConsentFormObtained", null);
+                  }
+              }
+            );
+          }
+        }
+      },
+      new UserMessagingPlatform.OnConsentFormLoadFailureListener() {
+        @Override
+        public void onConsentFormLoadFailure(FormError formError) {
+          Map<String, Object> args = new HashMap<>();
+          args.put("message", formError.getMessage());
+          methodChannel.invokeMethod("onConsentFormError", args);
+        }
+      }
+    );
   }
 }
