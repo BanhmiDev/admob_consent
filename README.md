@@ -56,7 +56,7 @@ import 'package:flutter/material.dart';
 import 'package:admob_consent/admob_consent.dart';
 
 final AdmobConsent _admobConsent = AdmobConsent();
-_admobConsent.show();
+_admobConsent.show(); // Form won't appear (again) if it isn't required, you can safely call this at app start
 ```
 
 ### Listener
