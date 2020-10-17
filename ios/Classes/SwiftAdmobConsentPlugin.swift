@@ -92,14 +92,14 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
                   self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
                 }
               })
-            } else if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
+            }/* else if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
               // Already obtained previously, display form to let user manage/change consent
               form?.present(from: currentViewController, completionHandler: {(dismissError) in
                   if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
                     self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
                   }
               })
-            }
+            }*/
         }
     })
   }

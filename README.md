@@ -2,7 +2,7 @@
 
 ![Pub Version](https://img.shields.io/pub/v/admob_consent)
 
-User Messaging Platform wrapper used for consent gathering (i.e. GDPR) on Android and iOS. **NEW:** now uses Google's new `User Messaging Platform` with `Funding Choices`.
+User Messaging Platform wrapper used for consent gathering (i.e. GDPR, ATT or both) on Android and iOS. Uses Google's new `User Messaging Platform` with `Funding Choices`.
 
 ## Screenshots
 
@@ -39,12 +39,15 @@ Make sure to have added your [app ID](https://support.google.com/admob/answer/73
 <string>YOUR-APP-ID</string>
 ```
 
-If you intend to use this SDK for Apple's new ATT requirement (iOS 14+), add the following to `Info.plist`. More information [here](https://support.google.com/fundingchoices/answer/9995402).
+### 3.1 iOS ATT Dialog
+If you intend to use this SDK for Apple's new ATT requirement (iOS 14+), add the following to `Info.plist`. If you have the IDFA message enabled in Funding Choices, the ATT dialog will appear automatically after it within your app. More information [here](https://support.google.com/fundingchoices/answer/9995402).
 
 ```xml
 <key>NSUserTrackingUsageDescription</key>
 <string>This identifier will be used to deliver personalized ads to you.</string>
 ```
+
+Next, you'll need to link the `AppTrackingTransparency` framework by going to your application's target in Xcode and clicking the plus icon on `Frameworks, Libraries and Embedded Content` tab. See Google's guide [here](https://developers.google.com/admob/ump/ios/quick-start#app_tracking_transparency).
 
 ### Example
 
@@ -57,7 +60,7 @@ _admobConsent.show();
 ```
 
 ### Listener
-You can listen to the ```onConsentFormLoaded```, ```onConsentFormOpened```, ```onConsentFormObtained``` and ```onConsentFormError``` streams.
+You can listen to the ```onConsentFormLoaded```, ```onConsentFormOpened```, ```onConsentFormObtained``` and ```onConsentFormError``` streams. The UMP SDK should handle most of the things though.
 
 ``` dart
 _admobConsent.onConsentFormObtained.listen((o) {
@@ -67,38 +70,3 @@ _admobConsent.onConsentFormObtained.listen((o) {
 
 ## Enjoy it?
 <a href="https://www.buymeacoffee.com/AntegerDigital" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;"></a>
-
-## Troubleshooting
-### Consent form does not show up in Android release builds
-You most likely have to fiddle with proguards to keep some classes from being obfuscated or disable ```minifyEnabled```.
-
-```
-# Keep classes of this plugin
--keep class com.anteger.** { *; }
-
-# Gson uses generic type information stored in a class file when working with fields. Proguard
-# removes such information by default, so configure it to keep all of it.
--keepattributes Signature
-
-# For using GSON @Expose annotation
--keepattributes *Annotation*
-
-# Gson specific classes
--dontwarn sun.misc.**
-#-keep class com.google.gson.stream.** { *; }
-
-# Application classes that will be serialized/deserialized over Gson
--keep class com.google.gson.examples.android.model.** { <fields>; }
-
-# Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
-# JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
--keep class * implements com.google.gson.TypeAdapter
--keep class * implements com.google.gson.TypeAdapterFactory
--keep class * implements com.google.gson.JsonSerializer
--keep class * implements com.google.gson.JsonDeserializer
-
-# Prevent R8 from leaving Data object members always null
--keepclassmembers,allowobfuscation class * {
-  @com.google.gson.annotations.SerializedName <fields>;
-}
-```

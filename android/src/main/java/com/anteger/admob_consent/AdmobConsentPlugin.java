@@ -164,7 +164,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
                   }
               }
             );
-          } else if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
+          /*} else if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
             // Already obtained previously, display form to let user manage/change consent
             consentForm.show(
               activity,
@@ -174,7 +174,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
                     methodChannel.invokeMethod("onConsentFormObtained", null);
                   }
               }
-            );
+            );*/
           }
         }
       },
