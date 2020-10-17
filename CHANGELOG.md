@@ -1,7 +1,7 @@
 ## 1.1.1
 
 * Update README instructions for people having issues with the ATT dialog
-* To prevent confusion, the form will no longer be called if the consent was already obtained
+* **Behaviour Change:** To prevent confusion, the form will no longer be called if the consent was already obtained
 
 ## 1.1.0
 
