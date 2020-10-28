@@ -74,7 +74,7 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
             let formStatus = UMPConsentInformation.sharedInstance.formStatus
             if formStatus == .available {
               // Load form
-              self.loadForm(currentViewController: currentViewController!, forceShow)
+              self.loadForm(currentViewController: currentViewController!, forceShow: forceShow)
             }
         }
     })
