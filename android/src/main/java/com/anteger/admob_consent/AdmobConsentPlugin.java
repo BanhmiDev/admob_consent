@@ -114,6 +114,10 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
 
   private void showConsent(MethodCall call) {
     if (activity == null) return; // No activity
+
+    // Determines if form should be shown despite consent already being obtained
+    final boolean forceShow = call.argument("forceShow");
+
     ConsentRequestParameters params = new ConsentRequestParameters.Builder().build();
     consentInformation = UserMessagingPlatform.getConsentInformation(activity);
     consentInformation.requestConsentInfoUpdate(
@@ -127,7 +131,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
             // You are now ready to check if a form is available.
             if (consentInformation.isConsentFormAvailable()) {
               // Load form
-              loadForm();
+              loadForm(forceShow);
             }
         }
       },
@@ -142,7 +146,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
     );
   }
 
-  private void loadForm() {
+  private void loadForm(boolean forceShow) {
     UserMessagingPlatform.loadConsentForm(
       activity,
       new UserMessagingPlatform.OnConsentFormLoadSuccessListener() {
@@ -164,7 +168,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
                   }
               }
             );
-          /*} else if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
+          } else if (forceShow) {
             // Already obtained previously, display form to let user manage/change consent
             consentForm.show(
               activity,
@@ -174,7 +178,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
                     methodChannel.invokeMethod("onConsentFormObtained", null);
                   }
               }
-            );*/
+            );
           }
         }
       },

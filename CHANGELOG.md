@@ -1,3 +1,7 @@
+## 1.1.2
+
+* Add `forceShow` argument to force the form to be shown again, even if the consent was already obtained (Apple's ATT dialog is one-time per app, see *README*)
+
 ## 1.1.1
 
 * Update README instructions for people having issues with the ATT dialog

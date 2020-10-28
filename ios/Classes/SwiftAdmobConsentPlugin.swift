@@ -45,15 +45,21 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
   }
 
   private func showConsent(_ call: FlutterMethodCall) {
+    guard let args = call.arguments as? Dictionary<String, Any> else {
+      let data: [String:Any] = ["message": "Invalid call arguments"] // Used for invoke methods (listeners)
+      self.channel.invokeMethod("onConsentFormError", arguments: data)
+      return
+    }
+
     let presentedViewController = self.viewController?.presentedViewController
     let currentViewController: UIViewController? = presentedViewController ?? self.viewController as? UIViewController
-
-    // Should not happen, but anyway
     if currentViewController == nil {
       let data: [String:Any] = ["message": "Invalid view controller"] // Used for invoke methods (listeners)
       self.channel.invokeMethod("onConsentFormError", arguments: data)
       return
     }
+
+    let forceShow = (args["forceShow"] as! Bool)
     
     let parameters = UMPRequestParameters()
     parameters.tagForUnderAgeOfConsent = false
@@ -68,13 +74,13 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
             let formStatus = UMPConsentInformation.sharedInstance.formStatus
             if formStatus == .available {
               // Load form
-              self.loadForm(currentViewController: currentViewController!)
+              self.loadForm(currentViewController: currentViewController!, forceShow)
             }
         }
     })
   }
 
-  private func loadForm(currentViewController: UIViewController) {
+  private func loadForm(currentViewController: UIViewController, forceShow: Bool) {
     UMPConsentForm.load(completionHandler: {(form, loadError) in
         if let error = loadError as NSError? {
             // Form load error
@@ -92,14 +98,14 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
                   self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
                 }
               })
-            }/* else if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
+            } else if forceShow {
               // Already obtained previously, display form to let user manage/change consent
               form?.present(from: currentViewController, completionHandler: {(dismissError) in
                   if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
                     self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
                   }
               })
-            }*/
+            }
         }
     })
   }
