@@ -147,6 +147,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
   }
 
   private void loadForm(boolean forceShow) {
+    final boolean finalForceShow = forceShow;
     UserMessagingPlatform.loadConsentForm(
       activity,
       new UserMessagingPlatform.OnConsentFormLoadSuccessListener() {
@@ -168,7 +169,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
                   }
               }
             );
-          } else if (forceShow) {
+          } else if (finalForceShow) {
             // Already obtained previously, display form to let user manage/change consent
             consentForm.show(
               activity,
