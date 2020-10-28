@@ -52,11 +52,15 @@ Next, you'll need to link the `AppTrackingTransparency` framework by going to yo
 ### Example
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:admob_consent/admob_consent.dart';
 
 final AdmobConsent _admobConsent = AdmobConsent();
-_admobConsent.show(); // Form won't appear (again) if it isn't required, you can safely call this at app start
+
+// Form won't appear (again) if it isn't required, you can safely call this at app start
+_admobConsent.show(); // Internally defaults to: forceShow: false
+
+// Form will appear (again) even if consent was already configured (i.e. use in button to let user manage his consent)
+_admobConsent.show(forceShow: true);
 ```
 
 ### Listener

@@ -60,8 +60,6 @@ class AdmobConsent {
   }
 
   /// Shows admob consent form for the given publisherId
-  Future<Null> show() async => await _channel.invokeMethod('show');
-
   Future<Null> show({bool forceShow = false}) async =>
       await _channel.invokeMethod('show', {'forceShow': forceShow});
 
