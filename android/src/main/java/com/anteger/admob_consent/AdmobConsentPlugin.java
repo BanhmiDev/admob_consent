@@ -130,6 +130,7 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
             // The consent information state was updated.
             // You are now ready to check if a form is available.
             if (consentInformation.isConsentFormAvailable()) {
+              methodChannel.invokeMethod("onConsentFormAvailable", null);
               // Load form
               loadForm(forceShow);
             }

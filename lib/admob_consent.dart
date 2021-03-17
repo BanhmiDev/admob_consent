@@ -24,6 +24,7 @@ class AdmobConsent {
   final _onConsentFormLoaded = StreamController<Null>.broadcast();
   final _onConsentFormOpened = StreamController<Null>.broadcast();
   final _onConsentFormObtained = StreamController<Null>.broadcast();
+  final _onConsentFormAvailable = StreamController<Null>.broadcast();
   final _onConsentFormError = StreamController<dynamic>.broadcast();
 
   static AdmobConsent _instance;
@@ -53,6 +54,9 @@ class AdmobConsent {
       case 'onConsentFormObtained':
         _onConsentFormObtained.add(null);
         break;
+      case 'onConsentFormAvailable':
+        _onConsentFormAvailable.add(null);
+        break;
       case 'onConsentFormError':
         _onConsentFormError.add(call.arguments['message']);
         break;
@@ -71,6 +75,9 @@ class AdmobConsent {
 
   /// Triggered when the consent form has been opened
   Stream<Null> get onConsentFormObtained => _onConsentFormObtained.stream;
+
+  /// Triggered when the consent form is available
+  Stream<Null> get onConsentFormAvailable => _onConsentFormAvailable.stream;
 
   /// Returns error message when an error has occurred
   Stream<dynamic> get onConsentFormError => _onConsentFormError.stream;
