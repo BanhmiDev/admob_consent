@@ -27,14 +27,14 @@ class AdmobConsent {
   final _onConsentFormAvailable = StreamController<Null>.broadcast();
   final _onConsentFormError = StreamController<dynamic>.broadcast();
 
-  static AdmobConsent _instance;
+  static AdmobConsent? _instance;
 
   factory AdmobConsent() {
     if (_instance == null) {
       const MethodChannel methodChannel = const MethodChannel('admob_consent');
       _instance = AdmobConsent.private(methodChannel);
     }
-    return _instance;
+    return _instance!;
   }
 
   @visibleForTesting
