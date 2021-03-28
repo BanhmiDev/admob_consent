@@ -21,19 +21,19 @@ import 'package:flutter/services.dart';
 class AdmobConsent {
   final MethodChannel _channel;
 
-  final _onConsentFormLoaded = StreamController<Null>.broadcast();
-  final _onConsentFormOpened = StreamController<Null>.broadcast();
-  final _onConsentFormObtained = StreamController<Null>.broadcast();
+  final _onConsentFormLoaded = StreamController<void>.broadcast();
+  final _onConsentFormOpened = StreamController<void>.broadcast();
+  final _onConsentFormObtained = StreamController<void>.broadcast();
   final _onConsentFormError = StreamController<dynamic>.broadcast();
 
-  static AdmobConsent _instance;
+  static late AdmobConsent? _instance;
 
   factory AdmobConsent() {
     if (_instance == null) {
       const MethodChannel methodChannel = const MethodChannel('admob_consent');
       _instance = AdmobConsent.private(methodChannel);
     }
-    return _instance;
+    return _instance!;
   }
 
   @visibleForTesting
@@ -42,7 +42,7 @@ class AdmobConsent {
   }
 
   /// Handles calls from the native side
-  Future<Null> _handleMessages(MethodCall call) async {
+  Future<void> _handleMessages(MethodCall call) async {
     switch (call.method) {
       case 'onConsentFormLoaded':
         _onConsentFormLoaded.add(null);
@@ -60,21 +60,22 @@ class AdmobConsent {
   }
 
   /// Shows admob consent form for the given publisherId
-  Future<Null> show({bool forceShow = false}) async =>
+  Future<void> show({bool forceShow = false}) async =>
       await _channel.invokeMethod('show', {'forceShow': forceShow});
 
   /// Triggered when the form has been loaded
-  Stream<Null> get onConsentFormLoaded => _onConsentFormLoaded.stream;
+  Stream<void> get onConsentFormLoaded => _onConsentFormLoaded.stream;
 
   /// Triggered when the consent form has been opened
-  Stream<Null> get onConsentFormOpened => _onConsentFormOpened.stream;
+  Stream<void> get onConsentFormOpened => _onConsentFormOpened.stream;
 
   /// Triggered when the consent form has been opened
-  Stream<Null> get onConsentFormObtained => _onConsentFormObtained.stream;
+  Stream<void> get onConsentFormObtained => _onConsentFormObtained.stream;
 
   /// Returns error message when an error has occurred
   Stream<dynamic> get onConsentFormError => _onConsentFormError.stream;
 
+  /// Dispose the admob consent instance
   void dispose() {
     _onConsentFormLoaded.close();
     _onConsentFormOpened.close();

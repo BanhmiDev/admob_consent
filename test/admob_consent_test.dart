@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:admob_consent/admob_consent.dart';
 
 void main() {
   const MethodChannel channel = MethodChannel('admob_consent');
@@ -18,6 +17,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await AdmobConsent.platformVersion, '42');
+    expect(await channel.invokeMethod('getPlatformVersion'), '42');
   });
 }
