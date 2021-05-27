@@ -16,6 +16,7 @@
 import Flutter
 import UIKit
 import UserMessagingPlatform
+//import FBSDKCoreKit.FBSDKSettings
 
 public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
   
@@ -91,22 +92,15 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
             // Form load success
             self.channel.invokeMethod("onConsentFormOpened", arguments: nil)
 
-            if UMPConsentInformation.sharedInstance.consentStatus == .required {
+            if UMPConsentInformation.sharedInstance.consentStatus == .required || forceShow {
               // Consent required, first time opening form
               form?.present(from: currentViewController, completionHandler: {(dismissError) in
                 if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
                   // Obtained consent from form
-                  let data: [String:Any] = ["consent": UMPConsentInformation.sharedInstance.consentType == .personalized] // Use
-                  self.channel.invokeMethod("onConsentFormObtained", arguments: data)
+                  //Settings.setAdvertiserTrackingEnabled(UMPConsentInformation.sharedInstance.consentType == .personalized)
+                  //let data: [String:Any] = ["consent": UMPConsentInformation.sharedInstance.consentType == .personalized] // Use
+                  self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
                 }
-              })
-            } else if forceShow {
-              // Already obtained previously, display form to let user manage/change consent
-              form?.present(from: currentViewController, completionHandler: {(dismissError) in
-                  if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
-                    let data: [String:Any] = ["consent": UMPConsentInformation.sharedInstance.consentType == .personalized] // Use
-                    self.channel.invokeMethod("onConsentFormObtained", arguments: data)
-                  }
               })
             }
         }
