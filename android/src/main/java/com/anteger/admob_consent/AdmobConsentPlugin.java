@@ -166,7 +166,11 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
                   @Override
                   public void onConsentFormDismissed(FormError formError) {
                     // Obtained consent from form
-                    methodChannel.invokeMethod("onConsentFormObtained", null);
+                    if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
+                      Map<String, Object> args = new HashMap<>();
+                      args.put("consent", consentInformation.getConsentType() == ConsentInformation.ConsentType.PERSONALIZED);
+                      methodChannel.invokeMethod("onConsentFormObtained", args);
+                    }
                   }
               }
             );
@@ -177,7 +181,11 @@ public class AdmobConsentPlugin implements FlutterPlugin, MethodCallHandler, Act
               new ConsentForm.OnConsentFormDismissedListener() {
                   @Override
                   public void onConsentFormDismissed(FormError formError) {
-                    methodChannel.invokeMethod("onConsentFormObtained", null);
+                    if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
+                      Map<String, Object> args = new HashMap<>();
+                      args.put("consent", consentInformation.getConsentType() == ConsentInformation.ConsentType.PERSONALIZED);
+                      methodChannel.invokeMethod("onConsentFormObtained", args);
+                    }
                   }
               }
             );
