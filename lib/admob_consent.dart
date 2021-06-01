@@ -24,16 +24,17 @@ class AdmobConsent {
   final _onConsentFormLoaded = StreamController<Null>.broadcast();
   final _onConsentFormOpened = StreamController<Null>.broadcast();
   final _onConsentFormObtained = StreamController<Null>.broadcast();
+  final _onConsentFormAvailable = StreamController<Null>.broadcast();
   final _onConsentFormError = StreamController<dynamic>.broadcast();
 
-  static AdmobConsent _instance;
+  static AdmobConsent? _instance;
 
   factory AdmobConsent() {
     if (_instance == null) {
       const MethodChannel methodChannel = const MethodChannel('admob_consent');
       _instance = AdmobConsent.private(methodChannel);
     }
-    return _instance;
+    return _instance!;
   }
 
   @visibleForTesting
@@ -51,7 +52,10 @@ class AdmobConsent {
         _onConsentFormOpened.add(null);
         break;
       case 'onConsentFormObtained':
-        _onConsentFormObtained.add(null);
+        _onConsentFormObtained.add(call.arguments['consent']);
+        break;
+      case 'onConsentFormAvailable':
+        _onConsentFormAvailable.add(null);
         break;
       case 'onConsentFormError':
         _onConsentFormError.add(call.arguments['message']);
@@ -71,6 +75,9 @@ class AdmobConsent {
 
   /// Triggered when the consent form has been opened
   Stream<Null> get onConsentFormObtained => _onConsentFormObtained.stream;
+
+  /// Triggered when the consent form is available
+  Stream<Null> get onConsentFormAvailable => _onConsentFormAvailable.stream;
 
   /// Returns error message when an error has occurred
   Stream<dynamic> get onConsentFormError => _onConsentFormError.stream;

@@ -16,6 +16,7 @@
 import Flutter
 import UIKit
 import UserMessagingPlatform
+//import FBSDKCoreKit.FBSDKSettings
 
 public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
   
@@ -52,7 +53,7 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
     }
 
     let presentedViewController = self.viewController?.presentedViewController
-    let currentViewController: UIViewController? = presentedViewController ?? self.viewController as? UIViewController
+    let currentViewController: UIViewController? = presentedViewController ?? self.viewController
     if currentViewController == nil {
       let data: [String:Any] = ["message": "Invalid view controller"] // Used for invoke methods (listeners)
       self.channel.invokeMethod("onConsentFormError", arguments: data)
@@ -64,7 +65,7 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
     let parameters = UMPRequestParameters()
     parameters.tagForUnderAgeOfConsent = false
     UMPConsentInformation.sharedInstance.requestConsentInfoUpdate(with: parameters, completionHandler: {(error) in
-        if let error = error as NSError? {
+        if (error as NSError?) != nil {
             // Consent info update error
             let data: [String:Any] = ["message": "Consent info fetch failed"] // Used for invoke methods (listeners)
             self.channel.invokeMethod("onConsentFormError", arguments: data)
@@ -73,6 +74,7 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
             self.channel.invokeMethod("onConsentFormLoaded", arguments: nil)
             let formStatus = UMPConsentInformation.sharedInstance.formStatus
             if formStatus == .available {
+                self.channel.invokeMethod("onConsentFormAvailable", arguments: nil)
               // Load form
               self.loadForm(currentViewController: currentViewController!, forceShow: forceShow)
             }
@@ -82,7 +84,7 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
 
   private func loadForm(currentViewController: UIViewController, forceShow: Bool) {
     UMPConsentForm.load(completionHandler: {(form, loadError) in
-        if let error = loadError as NSError? {
+        if (loadError as NSError?) != nil {
             // Form load error
             let data: [String:Any] = ["message": "Consent form failed"] // Used for invoke methods (listeners)
             self.channel.invokeMethod("onConsentFormError", arguments: data)
@@ -90,20 +92,15 @@ public class SwiftAdmobConsentPlugin: NSObject, FlutterPlugin {
             // Form load success
             self.channel.invokeMethod("onConsentFormOpened", arguments: nil)
 
-            if UMPConsentInformation.sharedInstance.consentStatus == .required {
+            if UMPConsentInformation.sharedInstance.consentStatus == .required || forceShow {
               // Consent required, first time opening form
               form?.present(from: currentViewController, completionHandler: {(dismissError) in
                 if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
                   // Obtained consent from form
+                  //Settings.setAdvertiserTrackingEnabled(UMPConsentInformation.sharedInstance.consentType == .personalized)
+                  //let data: [String:Any] = ["consent": UMPConsentInformation.sharedInstance.consentType == .personalized] // Use
                   self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
                 }
-              })
-            } else if forceShow {
-              // Already obtained previously, display form to let user manage/change consent
-              form?.present(from: currentViewController, completionHandler: {(dismissError) in
-                  if UMPConsentInformation.sharedInstance.consentStatus == .obtained {
-                    self.channel.invokeMethod("onConsentFormObtained", arguments: nil)
-                  }
               })
             }
         }
